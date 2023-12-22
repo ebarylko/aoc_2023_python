@@ -23,5 +23,5 @@ def test_sum_lines():
                              "4nineeightseven2",
                              "zoneight234",
                              "7pqrstsixteen"])
-    assert 1 == sum_lines(input)
+    assert 54277 == sum_lines(input)
 
