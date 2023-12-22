@@ -46,10 +46,10 @@ def join_digits(digits):
     first, last = digits
     return first * 10 + last
 
-def first_and_last_digit(line):
+def calibration_value(line):
     """
     @param line: the line to extract the calibration value from
-    @return: the first and last digit in the line
+    @return: the calibration value for the line
     """
     return tfz.thread_last(
         line,
@@ -65,5 +65,5 @@ def sum_lines(lines):
     """
     return tfz.thread_last(
         lines,
-        (map, first_and_last_digit),
+        (map, calibration_value),
         (reduce, operator.add))
