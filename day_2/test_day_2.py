@@ -21,9 +21,19 @@ def cube_sets(games):
         (map, lambda cubes: cubes.split(r',')),
         list,
         (map, tfz.compose(list, partial(map, methodcaller('strip')))),
-        list,
+        list
+    )
 
-
+def game_id(game):
+    """
+    @param game: a pair of the form game_id, cube_sets
+    @return: the numerical value of the game id
+    """
+    return tfz.thread_last(
+        game,
+        iter.first,
+        iter.last,
+        int
     )
 
 def split_id_and_cube_sets(games):
@@ -31,7 +41,7 @@ def split_id_and_cube_sets(games):
     @param games: a collection of games
     @return: a collection of pairs of game ids and their corresponding cube sets
     """
-    return tfz.juxt(iter.first, cube_sets)(games)
+    return tfz.juxt(game_id, cube_sets)(games)
 
 def parse_input(input):
     """
