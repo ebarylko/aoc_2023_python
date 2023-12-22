@@ -20,7 +20,7 @@ def first_and_last_digit(line):
     @param line: the line to extract the calibration value from
     @return: the first and last digit in the line
     """
-    matches = re.findall(r'(?=(\d|zero|one|two|three|four|five|six|seven|eight|nine)+)', line)
+    matches = re.findall(r'(?=(\d|zero|one|two|three|four|five|six|seven|eight|nine))', line)
     return pipe(matches, lambda m: [to_number(m[i]) for i in (0, -1)], lambda coll: coll[0] * 10 + coll[1])
 
 def sum_lines(lines):
