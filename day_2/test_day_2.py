@@ -18,19 +18,24 @@ def parse_input(input_file):
     lines = open(input_file).readlines()
     return tfz.thread_last(
         lines,
+(iter.take, 1),
+        list,
         (map, methodcaller("split", r':')),
+        list,
+        (map, tfz.compose(list, split_id_and_cube_sets)),
         list
-        # (map, lambda line: line.split(r':'))
-        # (map, methodcaller("split", r':')),
-        # lambda lines: lines.split(r':'),
-        # (map, split_id_and_cube_sets)
     )
 # def test_input():
 #     assert [line.strip() for line in divided] == "i"
 
+def test_add_cube_information():
+    assert add_cube_information({}, '4 green') == {"green": 4}
+def test_cube_set_to_map():
+    assert cube_set_to_map(['4 green', '3 blue', '11 red']) == {"green": 4, "blue": 3, "red": 11}
 def test_example():
     assert parse_input("input.txt") == "i"
     # assert split_id_and_cube_sets(example) == "i"
+
 
 # def test_sum_valid_ids():
 #     assert sum_valid_ids(example, example_limits) == 8
