@@ -59,3 +59,16 @@ def cube_set_to_map(cube_set):
     @return: a map with key value pairs of the form cube color, number of cubes
     """
     return tfz.reduce(add_cube_information, cube_set, {})
+
+def id_and_max_number_of_all_cube_types(game):
+    """
+    @param game: a collection with the game id and the cube sets obtained in the game
+    @return: a map with the key value pairs of game id and a collection containing the maximum number of cubes for each color type
+    """
+    return {iter.first(game): tfz.thread_last(
+        game,
+        iter.second,
+        (map, cube_set_to_map),
+        list,
+        (dict.merge_with, max),
+    )}
