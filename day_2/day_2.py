@@ -4,6 +4,22 @@ import toolz.dicttoolz as dict
 from functools import partial
 from operator import *
 
+def parse_input(input):
+    """
+    @param input: all the games with the corresponding sets of cubes
+    @return: a collection of pairs of the form game id, cube sets
+    """
+    return tfz.thread_last(
+        input,
+        list,
+        (map, methodcaller("split", r':')),
+        list,
+        (map, tfz.compose(list, split_id_and_cube_sets)),
+        list,
+        (map, id_and_max_number_of_all_cube_types),
+        list
+    )
+
 def cube_sets(games):
     """
     @param games: a collection of games
@@ -72,3 +88,37 @@ def id_and_max_number_of_all_cube_types(game):
         list,
         (dict.merge_with, max),
     )}
+
+def all_cube_numbers():
+    return itemgetter("red", "green", "blue")
+def is_valid_game(cube_limits, game):
+    """
+    @param cube_limits: the maximum number of red, blue, and green cubes
+    @param game: a collection with the game id and the largest number of red, blue, and green cubes drawn
+    @return: true if the number of drawn cubes for every color is less than or equal to the maximum
+    number of cubes for that color
+    """
+    [max_red_cubes, max_green_cubes, max_blue_cubes] = cube_limits
+    [red_cubes, green_cubes, blue_cubes] =  tfz.thread_last(
+        game.values(),
+        list,
+        iter.first,
+        lambda k: itemgetter("green", "blue", "red")(k),
+    )
+    return red_cubes <= max_red_cubes and green_cubes <= max_green_cubes and blue_cubes <= max_blue_cubes
+
+def sum_valid_ids(games, cube_limits):
+    """
+    @param games: a collection of games which have an id and corresponding cube sets
+    @param cube_limits: the maximum number of red, blue, and green cubes that can be drawn
+    @return: the sum of all game ids which have cube sets which draw less than or the same amount of cubes in cube_limits for that specific color
+    """
+    return tfz.thread_last(
+        games,
+        parse_input,
+        (filter, tfz.partial(is_valid_game, cube_limits)),
+        list
+        # (iter.mapcat, lambda game: iter.first(game))
+
+
+    )
