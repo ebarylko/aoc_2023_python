@@ -63,8 +63,8 @@ def test_eval(test_input):
     assert color_parser.parse(test_input) == test_input
 
 def test_is_valid_game():
-    assert is_valid_game([12, 13, 14], {1: {"blue": 6, "green": 2, "red": 4}}) == True
-    assert is_valid_game([12, 13, 14], {95: {"blue": 9, "green": 11, "red": 13}}) == False
+    assert is_valid_game([12, 13, 14], {"blue": 6, "green": 2, "red": 4}) == True
+    assert is_valid_game([12, 13, 14], {"blue": 9, "green": 11, "red": 13}) == False
 def test_sum_valid_ids():
     assert sum_valid_ids(example_input, example_limits) == 8
     # assert sum_valid_ids(input, [12, 13, 14]) == 1

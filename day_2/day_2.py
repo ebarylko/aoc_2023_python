@@ -108,7 +108,7 @@ def id_and_max_number_of_all_cube_types(game):
 
 def all_cube_numbers():
     return itemgetter("red", "green", "blue")
-def is_valid_game(cube_limits, game):
+def is_valid_game(cube_limits, cube_sets):
     """
     @param cube_limits: the maximum number of red, blue, and green cubes
     @param game: a collection with the game id and the largest number of red, blue, and green cubes drawn
@@ -116,12 +116,7 @@ def is_valid_game(cube_limits, game):
     number of cubes for that color
     """
     [max_red_cubes, max_green_cubes, max_blue_cubes] = cube_limits
-    [red_cubes, green_cubes, blue_cubes] =  tfz.thread_last(
-        game.values(),
-        list,
-        iter.first,
-        lambda k: itemgetter("red", "green", "blue")(k),
-    )
+    [red_cubes, green_cubes, blue_cubes] = itemgetter("red", "green", "blue")(cube_sets)
     return red_cubes <= max_red_cubes and green_cubes <= max_green_cubes and blue_cubes <= max_blue_cubes
 
 def sum_valid_ids(games, cube_limits):
@@ -134,7 +129,8 @@ def sum_valid_ids(games, cube_limits):
         games,
 
         input_parser,
-        # (filter, tfz.partial(is_valid_game, cube_limits)),
+        (tzd.valfilter, tfz.partial(is_valid_game, cube_limits)),
+        # list
         # (iter.mapcat, lambda game: game.keys()),
         # sum
     )
