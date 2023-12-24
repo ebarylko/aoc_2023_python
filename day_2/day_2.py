@@ -15,9 +15,9 @@ def parse_input(input):
         (map, methodcaller("split", r':')),
         list,
         (map, tfz.compose(list, split_id_and_cube_sets)),
-        # list,
-        # (map, id_and_max_number_of_all_cube_types),
-        # list
+        list,
+        (map, id_and_max_number_of_all_cube_types),
+        list
     )
 
 def cube_sets(games):
@@ -104,7 +104,7 @@ def is_valid_game(cube_limits, game):
         game.values(),
         list,
         iter.first,
-        lambda k: itemgetter("green", "blue", "red")(k),
+        lambda k: itemgetter("red", "green", "blue")(k),
     )
     return red_cubes <= max_red_cubes and green_cubes <= max_green_cubes and blue_cubes <= max_blue_cubes
 
@@ -117,9 +117,7 @@ def sum_valid_ids(games, cube_limits):
     return tfz.thread_last(
         games,
         parse_input,
-        # (filter, tfz.partial(is_valid_game, cube_limits)),
-        list,
-        # (iter.mapcat, lambda game: game.keys()),
-        # list,
-        # sum
+        (filter, tfz.partial(is_valid_game, cube_limits)),
+        (iter.mapcat, lambda game: game.keys()),
+        sum
     )
