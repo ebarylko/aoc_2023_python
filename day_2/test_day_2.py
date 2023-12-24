@@ -41,6 +41,11 @@ def test_number_color_parser():
 
 def test_set_parser():
     assert set_parser.parse("3 blue, 4 red") == {"blue": 3, "red": 4}
+
+def test_game_parser():
+    assert game_parser.parse("3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green") == {"green": 2, "blue": 6, "red": 4}
+
+
 @pytest.mark.parametrize("test_input", [ "red", "green", "blue"])
 def test_eval(test_input):
     assert color_parser.parse(test_input) == test_input

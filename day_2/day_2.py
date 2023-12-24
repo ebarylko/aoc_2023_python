@@ -10,6 +10,7 @@ color_parser = p.string("red") | p.string("green") | p.string("blue")
 
 number_color_parser = p.seq(number_parser << p.whitespace, color_parser).map(lambda t: [t[1], t[0]])
 set_parser = number_color_parser.sep_by(p.string(",") << p.whitespace, min=1, max=3).map(dict)
+game_parser = set_parser.sep_by(p.string(";") << p.whitespace, min=1).map(tfz.partial(tzd.merge_with, max))
 def parse_input(input):
     """
     @param input: all the games with the corresponding sets of cubes
