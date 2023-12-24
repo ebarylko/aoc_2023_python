@@ -11,21 +11,30 @@ color_parser = p.string("red") | p.string("green") | p.string("blue")
 number_color_parser = p.seq(number_parser << p.whitespace, color_parser).map(lambda t: [t[1], t[0]])
 set_parser = number_color_parser.sep_by(p.string(",") << p.whitespace, min=1, max=3).map(dict)
 game_parser = set_parser.sep_by(p.string(";") << p.whitespace, min=1).map(tfz.partial(tzd.merge_with, max))
+id_parser = p.string("Game ") >> number_parser
+line_parser = p.seq(id_parser << p.string(": "), game_parser)
+def input_parser(lines):
+    return tfz.thread_last(
+        lines,
+(map, lambda line: line_parser.parse(line)),
+        dict
+    )
 def parse_input(input):
     """
     @param input: all the games with the corresponding sets of cubes
     @return: a collection of pairs of the form game id, cube sets
     """
-    return tfz.thread_last(
-        input,
-        list,
-        (map, methodcaller("split", r':')),
-        list,
-        (map, tfz.compose(list, split_id_and_cube_sets)),
-        list,
-        (map, id_and_max_number_of_all_cube_types),
-        list
-    )
+    # return input_parser(input)
+    # return tfz.thread_last(
+    #     input,
+    #     list,
+    #     (map, methodcaller("split", r':')),
+    #     list,
+    #     (map, tfz.compose(list, split_id_and_cube_sets)),
+    #     list,
+    #     (map, id_and_max_number_of_all_cube_types),
+    #     list
+    # )
 
 def cube_sets(games):
     """
@@ -123,8 +132,9 @@ def sum_valid_ids(games, cube_limits):
     """
     return tfz.thread_last(
         games,
-        parse_input,
-        (filter, tfz.partial(is_valid_game, cube_limits)),
-        (iter.mapcat, lambda game: game.keys()),
-        sum
+
+        input_parser,
+        # (filter, tfz.partial(is_valid_game, cube_limits)),
+        # (iter.mapcat, lambda game: game.keys()),
+        # sum
     )

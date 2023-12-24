@@ -45,6 +45,18 @@ def test_set_parser():
 def test_game_parser():
     assert game_parser.parse("3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green") == {"green": 2, "blue": 6, "red": 4}
 
+def test_id_parser():
+    assert id_parser.parse("Game 1") == 1
+def test_line_parser():
+    assert line_parser.parse("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green") == [1, {"green": 2, "blue": 6, "red": 4}]
+
+def test_input_parser():
+    assert input_parser(example_input) == {1:  {"blue": 6, "red": 4, "green": 2},
+                                                  2: {"blue": 4, "green": 3, "red": 1},
+                                                  3: {"blue": 6, "green": 13, "red": 20},
+                                                  4: {"green": 3, "blue": 15, "red": 14},
+                                                  5: {"green": 3, "blue": 2, "red": 6}
+                                                  }
 
 @pytest.mark.parametrize("test_input", [ "red", "green", "blue"])
 def test_eval(test_input):
@@ -54,6 +66,6 @@ def test_is_valid_game():
     assert is_valid_game([12, 13, 14], {1: {"blue": 6, "green": 2, "red": 4}}) == True
     assert is_valid_game([12, 13, 14], {95: {"blue": 9, "green": 11, "red": 13}}) == False
 def test_sum_valid_ids():
-    # assert sum_valid_ids(example_input, example_limits) == 8
-    assert sum_valid_ids(input, [12, 13, 14]) == 1
+    assert sum_valid_ids(example_input, example_limits) == 8
+    # assert sum_valid_ids(input, [12, 13, 14]) == 1
 
