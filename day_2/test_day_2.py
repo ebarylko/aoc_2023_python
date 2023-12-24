@@ -2,6 +2,7 @@ import toolz.functoolz as tfz
 # import toolz.itertoolz as iter
 # from functools import partial
 # from operator import *
+import pytest
 from day_2 import *
 
 input = open("input.txt", "r").readlines()
@@ -32,6 +33,17 @@ def test_example():
     assert parse_input(input) == "i"
     # assert split_id_and_cube_sets(example) == "i"
 
+def test_number_parser():
+    assert number_parser.parse("4") == 4
+
+def test_number_color_parser():
+    assert number_color_parser.parse("4 green") == [4, "green"]
+
+def test_set_parser():
+    assert set_parser.parse("3 blue, 4 red") == {"blue": 3, "red": 4}
+@pytest.mark.parametrize("test_input", [ "red", "green", "blue"])
+def test_eval(test_input):
+    assert color_parser.parse(test_input) == test_input
 
 def test_is_valid_game():
     assert is_valid_game([12, 13, 14], {1: {"blue": 6, "green": 2, "red": 4}}) == True

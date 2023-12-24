@@ -1,9 +1,15 @@
 import toolz.functoolz as tfz
 import toolz.itertoolz as iter
-import toolz.dicttoolz as dict
+import toolz.dicttoolz as tzd
 from functools import partial
 from operator import *
+import parsy as p
 
+number_parser = p.regex(r'\d+').map(int)
+color_parser = p.string("red") | p.string("green") | p.string("blue")
+
+number_color_parser = p.seq(number_parser << p.whitespace, color_parser).map(lambda t: [t[1], t[0]])
+set_parser = number_color_parser.sep_by(p.string(",") << p.whitespace, min=1, max=3).map(dict)
 def parse_input(input):
     """
     @param input: all the games with the corresponding sets of cubes
@@ -56,7 +62,7 @@ def split_id_and_cube_sets(games):
     return tfz.juxt(game_id, cube_sets)(games)
 
 def add_cube(coll, cube):
-    return dict.assoc(coll, iter.second(cube), int(iter.first(cube)))
+    return tzd.assoc(coll, iter.second(cube), int(iter.first(cube)))
 
 def add_cube_information(coll, cube_info):
     """
@@ -87,7 +93,7 @@ def id_and_max_number_of_all_cube_types(game):
         iter.second,
         (map, cube_set_to_map),
         list,
-        (dict.merge_with, max),
+        (tzd.merge_with, max),
     )}
 
 def all_cube_numbers():
