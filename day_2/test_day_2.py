@@ -17,6 +17,9 @@ example_input = [
 
 example_limits = [12, 13, 14]
 
+small_example = [
+    "Game 16: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
+]
 
 
 
@@ -33,4 +36,7 @@ def test_example():
 def test_is_valid_game():
     assert is_valid_game([12, 13, 14], {1: {"blue": 6, "green": 2, "red": 4}}) == True
 def test_sum_valid_ids():
-    assert sum_valid_ids(example_input, example_limits) == 8
+    # assert sum_valid_ids(example_input, example_limits) == 8
+    # assert sum_valid_ids(input, [12, 13, 14]) == 1
+    assert sum_valid_ids(small_example, example_limits) == 1
+
