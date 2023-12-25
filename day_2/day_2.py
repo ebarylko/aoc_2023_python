@@ -133,3 +133,29 @@ def sum_valid_ids(games, cube_limits):
         list,
         sum
     )
+
+def game_power(game):
+    """
+    @param game: a map with key value pairs of game id, cube sets
+    @return: the power of the set
+    """
+    return tfz.pipe(
+        game,
+        methodcaller("values"),
+        list,
+        iter.first,
+        itemgetter("red", "green", "blue"),
+        tfz.partial(tfz.reduce, mul)
+    )
+
+
+def sum_power_of_games(games):
+    """
+    @param games: A collection of games containing a game id and the corresponding cube sets
+    @return: the sum of the power of all games
+    """
+    return tfz.thread_last(
+        games,
+        input_parser,
+        (map, game_power)
+    )
