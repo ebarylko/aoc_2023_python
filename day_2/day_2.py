@@ -24,11 +24,8 @@ def input_parser(lines):
     @return: a map with key value pairs of the form game id and a collection noting the maximum number
     of each cube color in the game
     """
-    return tfz.thread_last(
-        lines,
-        (map, lambda line: line_parser.parse(line)),
-        dict
-    )
+
+    return tfz.thread_last(lines, (map, line_parser.parse), dict)
 
 
 def is_valid_game(cube_limits, cube_sets):
@@ -59,18 +56,17 @@ def sum_valid_ids(games, cube_limits):
         input_parser,
         tfz.partial(tzd.valfilter, tfz.partial(is_valid_game, cube_limits)),
         op.methodcaller("keys"),
-        # lambda m: m.keys(),
         sum
     )
 
 
-def game_power(cube_set):
+def game_power(game):
     """
-    @param cube_set: a map with key value pairs of game id, cube sets
-    @return: the power of the set
+    @param game: a map with key value pairs of colors and the amount of cubes for that color
+    @return: the product of all cubes
     """
     return tfz.pipe(
-        cube_set,
+        game,
         op.itemgetter("red", "green", "blue"),
         tfz.partial(tfz.reduce, op.mul)
     )
