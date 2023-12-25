@@ -8,7 +8,7 @@ import parsy as p
 number_parser = p.regex(r'\d+').map(int)
 color_parser = p.string("red") | p.string("green") | p.string("blue")
 
-number_color_parser = p.seq(number_parser << p.whitespace, color_parser).map(lambda t: [t[1], t[0]])
+number_color_parser = p.seq(number_parser << p.whitespace, color_parser << p.string("\n").optional()).map(lambda t: [t[1], t[0]])
 set_parser = number_color_parser.sep_by(p.string(",") << p.whitespace, min=1, max=3).map(dict)
 game_parser = set_parser.sep_by(p.string(";") << p.whitespace, min=1).map(tfz.partial(tzd.merge_with, max))
 id_parser = p.string("Game ") >> number_parser
@@ -127,10 +127,9 @@ def sum_valid_ids(games, cube_limits):
     """
     return tfz.thread_last(
         games,
-
         input_parser,
         (tzd.valfilter, tfz.partial(is_valid_game, cube_limits)),
-        # list
-        # (iter.mapcat, lambda game: game.keys()),
-        # sum
+        lambda m: m.keys(),
+        list,
+        sum
     )
