@@ -21,10 +21,9 @@ line_parser = p.seq(id_parser << p.string(": "), game_parser)
 def input_parser(lines):
     """
     @param lines: all the games
-    @return: a map with key value pairs of the form game id and a collection noting the maximum number
+    @return: a map with key value pairs of the form game id, a collection noting the maximum number
     of each cube color in the game
     """
-
     return tfz.thread_last(lines, (map, line_parser.parse), dict)
 
 
