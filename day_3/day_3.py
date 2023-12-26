@@ -13,8 +13,6 @@ def possible_part_number_locations(location):
         lambda pos_shifts: it.product(pos_shifts, repeat=2),
         (filter, any),
         (zip, it.repeat(location)),
-        # (map, op.add, it.repeat(location)),
-        list
-
-        # (it.product, repeat=2)
+        (map, lambda coll: tuple(map(op.add, *coll))),
+        set,
     )
