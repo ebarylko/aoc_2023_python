@@ -1,6 +1,17 @@
 import day_3 as d3
 
 data = open("input.txt").readlines()
+sample = ["467..114..",
+          "...*......",
+          "..35..633.",
+          "......#...",
+          "617*......",
+          ".....+.58.",
+          "..592.....",
+          "......755.",
+          "...$.*....",
+          ".664.598.."
+          ]
 
 
 def test_is_valid_coordinate():
@@ -20,5 +31,9 @@ def test_possible_part_number_locations():
     assert (d3.possible_part_number_locations((0, 0)) ==
             {(1, 0), (0, 1), (1, 1)})
 
-# def test_sum_part_numbers():
-#     assert  sum_part_numbers(sample) == 4361
+
+def test_get_all_schematic_triplets():
+    assert d3.get_all_schematic_triplets([".1", ".2", ".3", ".4"]) == [(".1", ".2", ".3")]
+
+def test_sum_part_numbers():
+    assert d3.sum_part_numbers(sample) == 4361
