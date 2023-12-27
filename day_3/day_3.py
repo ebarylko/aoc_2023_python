@@ -49,9 +49,22 @@ def get_all_schematic_triplets(schematics):
     """
     return tz.thread_last(
         schematics,
-        (tz.partition_all, 3),
+        (tz.sliding_window, 3),
         (tz.remove, lambda coll: len(coll) < 3),
         list
+    )
+
+
+def get_first_and_last_schematic_duplet(schematic):
+    """
+    @param schematic: a collection of lines containing symbols, periods, and numbers
+    @return: the first and last partition of the schematic after partitioning it into sets of two
+    ex: get_first_and_last_schematic_duplet([".1", ".2", ".3", ".4"]) == [(".1", ".2"), ("
+    """
+    return tz.thread_last(
+        schematic,
+        (tz.sliding_window, 2),
+        (tz.juxt(tz.first, tz.last))
     )
 
 

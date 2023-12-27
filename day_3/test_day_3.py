@@ -33,7 +33,12 @@ def test_possible_part_number_locations():
 
 
 def test_get_all_schematic_triplets():
-    assert d3.get_all_schematic_triplets([".1", ".2", ".3", ".4"]) == [(".1", ".2", ".3")]
+    assert d3.get_all_schematic_triplets([".1", ".2", ".3", ".4"]) == [(".1", ".2", ".3"), (".2", ".3", ".4")]
+
+
+def test_get_first_and_last_schematic_duplet():
+    assert d3.get_first_and_last_schematic_duplet((".1", ".2", ".3", ".4")) == ((".1", ".2"), (".3", ".4"))
+
 
 def test_sum_part_numbers():
     assert d3.sum_part_numbers(sample) == 4361
