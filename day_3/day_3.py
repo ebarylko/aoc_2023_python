@@ -5,8 +5,8 @@ import operator as op
 def generate_valid_locations(x_coordinates, y_coordinates):
     return
 
-def is_valid_x_coordinate(x_coordinate, x_coordinate_range):
-    return tz.first(x_coordinate_range) <= x_coordinate <= tz.last(x_coordinate_range)
+def is_valid_coordinate(coordinate, coordinate_range):
+    return tz.first(coordinate_range) <= coordinate <= tz.last(coordinate_range)
 
 def is_valid_location(location, x_coordinate_range, y_coordinate_range):
     """
@@ -15,7 +15,7 @@ def is_valid_location(location, x_coordinate_range, y_coordinate_range):
     @param y_coordinate_range: a collection of valid y coordinates
     @return: true if the location has a valid x and y coordinate
     """
-    return is_valid_x_coordinate(tz.first(location), x_coordinate_range) and is_valid_y_coordinate(tz.second(location), y_coordinate_range)
+    return is_valid_coordinate(tz.first(location), x_coordinate_range) and is_valid_coordinate(tz.second(location), y_coordinate_range)
 
 def possible_part_number_locations(location):
     """
