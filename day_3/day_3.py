@@ -1,10 +1,11 @@
 import toolz as tz
 import itertools as it
 import operator as op
+import parsy as p
 
-
-def generate_valid_locations(x_coordinates, y_coordinates):
-    return
+non_digit_parser = p.regex(r'\D').many()
+digit_parser = non_digit_parser >> p.regex(r'\d+')
+line_parser = digit_parser.many().map(tz.compose(list, tz.partial(map, int)))
 
 
 def is_valid_coordinate(coordinate, coordinate_range):
@@ -58,13 +59,17 @@ def get_all_schematic_triplets(schematics):
 def get_first_and_last_schematic_duplet(schematic):
     """
     @param schematic: a collection of lines containing symbols, periods, and numbers
-    @return: the first and last partition of the schematic after partitioning it into sets of two
-    ex: get_first_and_last_schematic_duplet([".1", ".2", ".3", ".4"]) == [(".1", ".2"), ("
+    @return: the first partition after reversing it and the last partition
+    of the schematic after partitioning it into sets of two
+    ex: get_first_and_last_schematic_duplet([".1", ".2", ".3", ".4"]) == [(".2", ".1"), (".3", ".4")]
     """
     return tz.thread_last(
         schematic,
         (tz.sliding_window, 2),
-        (tz.juxt(tz.first, tz.last))
+        (tz.juxt(
+            tz.compose(
+                tz.juxt(tz.last, tz.first), tz.first),
+            tz.last))
     )
 
 
@@ -75,6 +80,9 @@ def sum_part_numbers(schematic):
     """
     return tz.thread_last(
         schematic,
-        (tz.partition_all, 3),
-        list
+        get_all_schematic_triplets,
+        (it.chain, get_first_and_last_schematic_duplet(schematic)),
+        tz.first,
+        tz.second,
+        # list
     )
