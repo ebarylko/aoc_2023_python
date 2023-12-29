@@ -26,7 +26,7 @@ def is_valid_location(x_coordinate_range, y_coordinate_range, location):
                                                                                                y_coordinate_range)
 
 
-def possible_surrounding_symbols(location, coordinate_restrictions):
+def possible_surrounding_symbols(coordinate_restrictions, location):
     """
     @param location: the x,y coordinates of the digit
     @param coordinate_restrictions: the boundaries for the x and y coordinates
@@ -40,7 +40,7 @@ def possible_surrounding_symbols(location, coordinate_restrictions):
         (filter, any),
         (zip, it.repeat(location)),
         (map, lambda coll: tuple(map(op.add, *coll))),
-        (filter, tz.partial(is_valid_location, tz.first(coordinate_restrictions), tz.last(coordinate_restrictions))),
+        (filter, tz.partial(is_valid_location, tz.second(coordinate_restrictions), tz.first(coordinate_restrictions))),
         set,
     )
 
@@ -58,13 +58,19 @@ def possible_symbol_locations(partial_schematic):
         (re.finditer, r"\d+"),
         (map, tz.partial(op.methodcaller("span"))),
         list,
-        (map, (tz.juxt(
-            tz.first,
-            tz.compose(
-                tz.partial(op.neg),
-                tz.partial(op.sub, 1),
-                tz.partial(tz.second))))),
+        (map, lambda coll: tz.thread_last(
+            range(*coll),
+            list)),
         list,
+        (map, generate_all_possible_locations, [0, len(partial_schematic)])
+        # (map, (tz.juxt(
+        #     tz.first,
+        #     tz.compose(
+        #         tz.partial(op.neg),
+        #         tz.partial(op.sub, 1),
+        #         tz.partial(tz.second))))),
+        # list,
+        # (map, )
 
     )
 
@@ -97,6 +103,28 @@ def get_first_and_last_schematic_duplet(schematic):
             tz.compose(
                 tz.juxt(tz.last, tz.first), tz.first),
             tz.last))
+    )
+
+
+def generate_symbol_locations_for_number(span_of_number, x_coordinate_limits, y_coordinate_limits):
+    """
+    @param span_of_number: a collection of the x coordinates that the number occupies
+    @param x_coordinate_limits: the lower and upper bound for the x coordinates
+    @param y_coordinate_limits: the lower and upper bound for the y coordinates
+    @return: the union of all the possible symbol locations for each x coordinate
+    """
+    return tz.thread_last(
+        it.repeat(1),
+        (zip, span_of_number),
+        list,
+        (map, tz.partial(possible_surrounding_symbols, [y_coordinate_limits, x_coordinate_limits])),
+        (tz.juxt(tz.first, tz.compose(
+            set,
+            tz.partial(
+                tz.drop, 1)))),
+        # list
+        # (map, list),
+        # (map, op.methodcaller("insert", 1, 1)),
     )
 
 
