@@ -53,7 +53,8 @@ def test_get_first_and_last_schematic_duplet():
 
 
 def test_possible_symbol_locations():
-    assert d3.possible_symbol_locations(("...*......", "467.......")) == (([0, 0], [0, 1], [0, 2], [1, 3], [0, 3]))
+    assert d3.possible_symbol_locations(("...*..", "46.14.")) == {46: ([0, 0], [0, 1], [0, 2], [1, 3], [0, 3]),
+                                                                  14: ([1, 2], [1, 5], [0, 2], [0, 3], [0, 4], [0, 5])}
 
 
 def test_sum_part_numbers():

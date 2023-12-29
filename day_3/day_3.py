@@ -2,6 +2,7 @@ import toolz as tz
 import itertools as it
 import operator as op
 import parsy as p
+import re
 
 non_digit_parser = p.regex(r'\D').many()
 digit_parser = non_digit_parser >> p.regex(r'\d+')
@@ -44,21 +45,27 @@ def possible_surrounding_symbols(location, coordinate_restrictions):
     )
 
 
-def possible_symbol_locations(location):
+def possible_symbol_locations(partial_schematic):
     """
-    @param location: the x,y coordinates of the digit
-    @return: all the possible locations for a symbol
-    adjacent to the digit
-    ex: possible_part_number_locations([0,0])
+    @param partial_schematic: two or three line of the schematic
+    @return: a collection of all the possible locations for a symbol
+    adjacent to the numbers in the second line of the partial schematic
+    ex: possible_part_number_locations([0, 1])
     """
     return tz.thread_last(
-        range(-1, 2),
-        lambda pos_shifts: it.product(pos_shifts, repeat=2),
-        (filter, any),
-        (zip, it.repeat(location)),
-        (map, lambda coll: tuple(map(op.add, *coll))),
-        # (filter, is_valid_location),
-        set,
+        partial_schematic,
+        tz.second,
+        (re.finditer, r"\d+"),
+        (map, tz.partial(op.methodcaller("span"))),
+        list,
+        (map, (tz.juxt(
+            tz.first,
+            tz.compose(
+                tz.partial(op.neg),
+                tz.partial(op.sub, 1),
+                tz.partial(tz.second))))),
+        list,
+
     )
 
 
