@@ -12,25 +12,45 @@ def is_valid_coordinate(coordinate, coordinate_range):
     return tz.first(coordinate_range) <= coordinate <= tz.last(coordinate_range)
 
 
-def is_valid_location(location, x_coordinate_range, y_coordinate_range):
+def is_valid_location(x_coordinate_range, y_coordinate_range, location):
     """
     @param location: a pair with an x, y coordinate
-    @param x_coordinate_range: a collection of valid x coordinates
-    @param y_coordinate_range: a collection of valid y coordinates
+    @param x_coordinate_range: the lower and upper bounds of the x coordinates
+    @param y_coordinate_range: the lower and upper bounds of the y coordinates
     @return: true if the location has a valid x and y coordinate
+    ex: is_valid_location([0, 1], [0, 1], [1, 1]) == true
+    is_valid_location([0, 1], [0, 1], [-1, 1]) == false
     """
     return is_valid_coordinate(tz.first(location), x_coordinate_range) and is_valid_coordinate(tz.second(location),
                                                                                                y_coordinate_range)
 
 
-def possible_part_number_locations(location):
+def possible_surrounding_symbols(location, coordinate_restrictions):
     """
-    @param location: the x,y coordinates of the symbol
-    @return: all the possible locations for a part number
-    adjacent to the symbol
-    ex: possible_part_number_locations([0,0], )
+    @param location: the x,y coordinates of the digit
+    @param coordinate_restrictions: the boundaries for the x and y coordinates
+    @return: all the possible locations for a symbol
+    adjacent to the digit
+    ex: possible_part_number_locations([0,0], [[0, 1], [0, 1]]) == {(1, 0), (0, 1), (1, 1)}
     """
-    # return list(it.repeat(location, 2))
+    return tz.thread_last(
+        range(-1, 2),
+        lambda pos_shifts: it.product(pos_shifts, repeat=2),
+        (filter, any),
+        (zip, it.repeat(location)),
+        (map, lambda coll: tuple(map(op.add, *coll))),
+        (filter, tz.partial(is_valid_location, tz.first(coordinate_restrictions), tz.last(coordinate_restrictions))),
+        set,
+    )
+
+
+def possible_symbol_locations(location):
+    """
+    @param location: the x,y coordinates of the digit
+    @return: all the possible locations for a symbol
+    adjacent to the digit
+    ex: possible_part_number_locations([0,0])
+    """
     return tz.thread_last(
         range(-1, 2),
         lambda pos_shifts: it.product(pos_shifts, repeat=2),
@@ -83,6 +103,6 @@ def sum_part_numbers(schematic):
         get_all_schematic_triplets,
         (it.chain, get_first_and_last_schematic_duplet(schematic)),
         tz.first,
-        tz.second,
+        # tz.second,
         # list
     )
