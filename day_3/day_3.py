@@ -5,8 +5,20 @@ import parsy as p
 import re
 
 non_digit_parser = p.regex(r'\D').many()
-digit_parser = non_digit_parser >> p.regex(r'\d+')
-line_parser = digit_parser.many().map(tz.compose(list, tz.partial(map, int)))
+digit_parser = non_digit_parser >> p.regex(r'\d+') << non_digit_parser
+
+
+@p.generate
+def digit_with_range_parser():
+    yield non_digit_parser
+    start = yield p.index
+    number = yield p.regex(r'\d+').map(int)
+    end = yield p.index
+    yield non_digit_parser
+    return number, (start, end - 1)
+
+
+line_parser = digit_with_range_parser.many()
 
 
 def is_valid_coordinate(coordinate, coordinate_range):
@@ -40,7 +52,7 @@ def possible_surrounding_symbols(coordinate_restrictions, location):
         (filter, any),
         (zip, it.repeat(location)),
         (map, lambda coll: tuple(map(op.add, *coll))),
-        (filter, tz.partial(is_valid_location, tz.second(coordinate_restrictions), tz.first(coordinate_restrictions))),
+        (filter, tz.partial(is_valid_location, tz.first(coordinate_restrictions), tz.second(coordinate_restrictions))),
         set,
     )
 
@@ -62,7 +74,12 @@ def possible_symbol_locations(partial_schematic):
             range(*coll),
             list)),
         list,
-        (map, generate_all_possible_locations, [0, len(partial_schematic)])
+        (map, tz.partial(generate_symbol_locations_for_number, [0, len(tz.first(partial_schematic)) - 1],
+                         [0, len(partial_schematic) - 1])),
+        list,
+        (zip, line_parser.parse(tz.second(partial_schematic)))
+        # (map, generate_symbol_locations_for_number, [0, len(tz.first(partial_schematic))], [0, len(partial_schematic)]),
+        # list
         # (map, (tz.juxt(
         #     tz.first,
         #     tz.compose(
@@ -106,7 +123,20 @@ def get_first_and_last_schematic_duplet(schematic):
     )
 
 
-def generate_symbol_locations_for_number(span_of_number, x_coordinate_limits, y_coordinate_limits):
+def coordinates_spanned_by_number(x_coordinate_range):
+    """
+    @param x_coordinate_range: the x coordinates the number spans
+    @return: a collection of the coordinates spanned by the number
+    coordinates_spanned_by_number([0, 2]) = {(0, 1), (1, 1), (2, 1)}
+    """
+    return tz.thread_first(
+        x_coordinate_range,
+        (zip, it.repeat(1)),
+        set
+    )
+
+
+def generate_symbol_locations_for_number(x_coordinate_limits, y_coordinate_limits, span_of_number):
     """
     @param span_of_number: a collection of the x coordinates that the number occupies
     @param x_coordinate_limits: the lower and upper bound for the x coordinates
@@ -114,18 +144,33 @@ def generate_symbol_locations_for_number(span_of_number, x_coordinate_limits, y_
     @return: the union of all the possible symbol locations for each x coordinate
     """
     return tz.thread_last(
-        it.repeat(1),
-        (zip, span_of_number),
+        span_of_number,
+        coordinates_spanned_by_number,
         list,
-        (map, tz.partial(possible_surrounding_symbols, [y_coordinate_limits, x_coordinate_limits])),
-        (tz.juxt(tz.first, tz.compose(
-            set,
-            tz.partial(
-                tz.drop, 1)))),
+        (map, tz.partial(possible_surrounding_symbols, [x_coordinate_limits, y_coordinate_limits])),
+        list,
+        (tz.juxt(tz.first,
+                 tz.compose(
+                     list,
+                     tz.partial(
+                         tz.drop, 1)))),
+        lambda coll: tz.first(coll).union(*tz.second(coll)),
+        lambda s: s - coordinates_spanned_by_number(span_of_number)
+
+        # lambda coll: x.union(*coll),
         # list
         # (map, list),
         # (map, op.methodcaller("insert", 1, 1)),
     )
+
+
+def find_numbers_and_positions(line):
+    """
+    @param line: a line of the schematic
+    @return: a collection of pairs of the numbers in the line and their span
+    ex: find_numbers_and_positions("46..") -> [(46, [0, 1])]
+    """
+    pass
 
 
 def sum_part_numbers(schematic):
@@ -135,9 +180,16 @@ def sum_part_numbers(schematic):
     """
     return tz.thread_last(
         schematic,
-        get_all_schematic_triplets,
-        (it.chain, get_first_and_last_schematic_duplet(schematic)),
-        tz.first,
-        # tz.second,
-        # list
+        (tz.mapcat, find_numbers_and_positions),  # (46, [[0,1], [0,2]])
+        (filter, tz.partial(is_part_number, schematic)),
+        (map, tz.first),
+        sum
     )
+    # return tz.thread_last(
+    #     schematic,
+    #     get_all_schematic_triplets,
+    #     (it.chain, get_first_and_last_schematic_duplet(schematic)),
+    #     tz.first,
+    #     # tz.second,
+    #     # list
+    # )
