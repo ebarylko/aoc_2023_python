@@ -19,7 +19,6 @@ def parse_line(line):
     )
 
 
-
 def is_valid_coordinate(coordinate, coordinate_range):
     return tz.first(coordinate_range) <= coordinate <= tz.last(coordinate_range)
 
@@ -174,6 +173,30 @@ def find_numbers_and_positions(t):
     return not parsed or [(a, index, b) for a, b in parsed]
 
 
+def is_part_number(schematic, number_info):
+    """
+    @param schematic: a collection of lines containing numbers, symbols, and periods
+    @param number_info: a triplet containing a number, the row it is in, and the x coordinates it spans
+    @return: true if there is a symbol adjacent to the number. False otherwise
+    """
+    _, row, x_coordinates = number_info
+
+    possible_locations = [[row - 1, y] for y in range(*x_coordinates)] + \
+                         [[row + 1, y] for y in range(*x_coordinates)] + \
+                         [[r, x_coordinates[0] - 1] for r in [row - 1, row, row + 1]] + \
+                         [[r, x_coordinates[1]] for r in [row - 1, row, row + 1]]
+
+    def contains_symbol(pos):
+        x, y = pos
+        return x in range(0, len(schematic)) and y in range(0, len(schematic[0])) and schematic[x][y] not in ".0123456789"
+
+    return tz.thread_last(
+        possible_locations,
+        (filter, contains_symbol),
+        tz.count
+    )
+
+
 def sum_part_numbers(schematic):
     """
     @param schematic: a collection of lines containing symbols, periods, and numbers
@@ -182,8 +205,8 @@ def sum_part_numbers(schematic):
     return tz.thread_last(
         enumerate(schematic),
         (tz.mapcat, find_numbers_and_positions),  # (46, (1, 2))
-        list
-        # (filter, tz.partial(is_part_number, schematic)),
+        list,
+        (filter, tz.partial(is_part_number, schematic)),
         # (map, tz.first),
         # sum
     )

@@ -44,7 +44,7 @@ def test_get_first_and_last_schematic_duplet():
 
 
 def test_find_numbers_and_positions():
-    assert d3.find_numbers_and_positions((1, "43..")) == [(43, 1, (0, 1))]
+    assert d3.find_numbers_and_positions((1, "43..")) == [(43, 1, (0, 2))]
 
 
 def test_possible_surrounding_symbols():
@@ -68,7 +68,9 @@ def test_possible_symbol_locations():
                                                         14: ([2, 0], [2, 1], [3, 0], [4, 0], [5, 0], [5, 1])}
 
 def test_is_part_number():
-    assert d3.is_part_number(["...#..", "..12.."], (12, 1, (2, 3)))
+    assert d3.is_part_number(["...#..", "..12.."], (12, 1, (2, 4)))
+    assert d3.is_part_number(["....#.", "..12.."], (12, 1, (2, 4)))
+    assert not d3.is_part_number([".....#", "..12.."], (12, 1, (2, 4)))
 
 
 def test_sum_part_numbers():
