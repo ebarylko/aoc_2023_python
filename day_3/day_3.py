@@ -4,21 +4,20 @@ import operator as op
 import parsy as p
 import re
 
-non_digit_parser = p.regex(r'\D').many()
-digit_parser = non_digit_parser >> p.regex(r'\d+') << non_digit_parser
 
+def parse_line(line):
+    """
+    @param line: the line from the schematic
+    @return: a collection of the results of calling line_parser multiple times
+    ex: parse_line('1.2') == [(1, (0)), (2, (2))]
+    """
+    return tz.thread_last(
+        line,
+        (re.finditer, r"\d+"),
+        (map, lambda m: (int(m.group(0)), m.span())),
+        list
+    )
 
-@p.generate
-def digit_with_range_parser():
-    yield non_digit_parser
-    start = yield p.index
-    number = yield p.regex(r'\d+').optional()
-    end = yield p.index
-    yield non_digit_parser
-    return number and (int(number), (start, end - 1))
-
-
-line_parser = digit_with_range_parser.many()
 
 
 def is_valid_coordinate(coordinate, coordinate_range):
@@ -171,7 +170,7 @@ def find_numbers_and_positions(t):
     ex: find_numbers_and_positions((1, "46..")) -> [(46, 1, [0, 1])]
     """
     index, line = t
-    parsed = line_parser.parse(line)
+    parsed = parse_line(line)
     return not parsed or [(a, index, b) for a, b in parsed]
 
 

@@ -14,18 +14,9 @@ sample = ["467..114..",
           ]
 
 
-def test_non_digit_parser():
-    assert d3.non_digit_parser.parse("......&#%@(%@(&%")
-
-
-def test_digit_parser():
-    assert d3.digit_parser.parse("....123") == '123'
-
-
-def test_line_parser():
-    assert d3.line_parser.parse("..20.19") == [(20, (2, 3)), (19, (5, 6))]
-    assert d3.line_parser.parse("46.1408.") == [(46, (0, 1)), (1408, (3, 6))]
-    assert not d3.line_parser.parse("....*...")
+def test_parse_line():
+    assert d3.parse_line("46.1408.") == [(46, (0, 2)), (1408, (3, 7))]
+    assert not d3.parse_line("........")
 
 
 def test_digit_with_range_parser():
