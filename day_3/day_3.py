@@ -12,10 +12,10 @@ digit_parser = non_digit_parser >> p.regex(r'\d+') << non_digit_parser
 def digit_with_range_parser():
     yield non_digit_parser
     start = yield p.index
-    number = yield p.regex(r'\d+').map(int)
+    number = yield p.regex(r'\d+').optional()
     end = yield p.index
     yield non_digit_parser
-    return number, (start, end - 1)
+    return number and (int(number), (start, end - 1))
 
 
 line_parser = digit_with_range_parser.many()
@@ -164,13 +164,15 @@ def generate_symbol_locations_for_number(x_coordinate_limits, y_coordinate_limit
     )
 
 
-def find_numbers_and_positions(line):
+def find_numbers_and_positions(t):
     """
-    @param line: a line of the schematic
-    @return: a collection of pairs of the numbers in the line and their span
-    ex: find_numbers_and_positions("46..") -> [(46, [0, 1])]
+    @param t: a tuple with the row index and a line of the schematic
+    @return: a collection of triplets of the numbers in the line, the row index, and their span
+    ex: find_numbers_and_positions((1, "46..")) -> [(46, 1, [0, 1])]
     """
-    pass
+    index, line = t
+    parsed = line_parser.parse(line)
+    return not parsed or [(a, index, b) for a, b in parsed]
 
 
 def sum_part_numbers(schematic):
@@ -179,11 +181,12 @@ def sum_part_numbers(schematic):
     @return: the sum of all the part numbers in the schematic
     """
     return tz.thread_last(
-        schematic,
-        (tz.mapcat, find_numbers_and_positions),  # (46, [[0,1], [0,2]])
-        (filter, tz.partial(is_part_number, schematic)),
-        (map, tz.first),
-        sum
+        enumerate(schematic),
+        (tz.mapcat, find_numbers_and_positions),  # (46, (1, 2))
+        list
+        # (filter, tz.partial(is_part_number, schematic)),
+        # (map, tz.first),
+        # sum
     )
     # return tz.thread_last(
     #     schematic,

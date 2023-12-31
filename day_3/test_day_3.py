@@ -4,13 +4,13 @@ data = open("input.txt").readlines()
 sample = ["467..114..",
           "...*......",
           "..35..633.",
-          "......#...",
-          "617*......",
-          ".....+.58.",
-          "..592.....",
-          "......755.",
-          "...$.*....",
-          ".664.598.."
+          # "......#...",
+          # "617*......",
+          # ".....+.58.",
+          # "..592.....",
+          # "......755.",
+          # "...$.*....",
+          # ".664.598.."
           ]
 
 
@@ -25,10 +25,12 @@ def test_digit_parser():
 def test_line_parser():
     assert d3.line_parser.parse("..20.19") == [(20, (2, 3)), (19, (5, 6))]
     assert d3.line_parser.parse("46.1408.") == [(46, (0, 1)), (1408, (3, 6))]
+    assert not d3.line_parser.parse("....*...")
 
 
 def test_digit_with_range_parser():
     assert d3.digit_with_range_parser.parse("..20..") == (20, (2, 3))
+    assert not d3.digit_with_range_parser.parse("....")
 
 
 def test_is_valid_coordinate():
@@ -51,7 +53,7 @@ def test_get_first_and_last_schematic_duplet():
 
 
 def test_find_numbers_and_positions():
-    assert d3.find_numbers_and_positions("43..") == [(43, [0, 1])]
+    assert d3.find_numbers_and_positions((1, "43..")) == [(43, 1, (0, 1))]
 
 
 def test_possible_surrounding_symbols():
@@ -73,6 +75,9 @@ def test_possible_symbol_locations():
     assert d3.possible_symbol_locations(("...*..",
                                          "46.14.")) == {46: ([0, 0], [1, 0], [2, 0], [2, 1]),
                                                         14: ([2, 0], [2, 1], [3, 0], [4, 0], [5, 0], [5, 1])}
+
+def test_is_part_number():
+    assert d3.is_part_number(["...#..", "..12.."], (12, 1, (2, 3)))
 
 
 def test_sum_part_numbers():
