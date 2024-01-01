@@ -83,6 +83,15 @@ def test_sum_part_numbers():
 
 def test_find_potential_gear_positions():
     assert d3.find_potential_gear_positions((1, "...*")) == [(1, 3)]
+    assert d3.find_potential_gear_positions((1, "....")) == []
+    assert d3.find_potential_gear_positions((1, "*.2*")) == [(1, 0), (1, 3)]
+
+
+def test_adjacent_numbers():
+    assert d3.adjacent_numbers(["..1..", "..*..", "..12."], (1, 2)) == [1, 12]
+
+def test_find_surrounding_numbers():
+    assert d3.find_surrounding_numbers(["..1..", "..*..", "..12."], [[(1, 2)]]) == [1, 12]
 
 
 def test_sum_gear_ratios():

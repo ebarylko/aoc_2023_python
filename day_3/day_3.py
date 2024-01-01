@@ -189,7 +189,8 @@ def is_part_number(schematic, number_info):
 
     def contains_symbol(pos):
         x, y = pos
-        return x in range(0, len(schematic)) and y in range(0, len(schematic[0])) and schematic[x][y] not in ".0123456789"
+        return x in range(0, len(schematic)) and y in range(0, len(schematic[0])) and schematic[x][
+            y] not in ".0123456789"
 
     locations = list(filter(contains_symbol, possible_locations))
     return tz.thread_last(
@@ -228,6 +229,32 @@ def find_potential_gear_positions(t):
     )
 
 
+def adjacent_numbers(schematic, possible_gear_location):
+    """
+    @param schematic: a collection of lines containing symbols, periods, and digits
+    @param possible_gear_location: the x, y coordinates of a potential gear
+    @return: a collection of the numbers surrounding each gear
+    """
+    return tz.thread_last(
+        range(-1, 2),
+(lambda r: it.product(r, repeat=2)),
+        list,
+        (map, lambda c1, c2: (c1[0] + c2[0], c1[1] + c2[1]), it.repeat(possible_gear_location)),
+        list
+
+    )
+
+
+def find_surrounding_numbers(schematic, coll):
+    """
+    @param coll: a collection of the positions of potential gears in a row
+    @return: a collection of the numbers surrounding each potential gear
+    """
+    return tz.thread_last(
+        coll,
+        (map, adjacent_numbers)
+    )
+
 
 def sum_gear_ratios(schematic):
     """
@@ -238,9 +265,19 @@ def sum_gear_ratios(schematic):
     filtrar las estrellas que solo tienen dos numeros
     tomar el producto de los numeros en cada estrella
     """
+    numbers_and_positions = tz.thread_last(
+        schematic,
+        enumerate,
+        (tz.mapcat, find_numbers_and_positions),
+        list,
+        (tz.groupby, tz.second)
+    )
+    # return numbers_and_positions
     return tz.thread_last(
         schematic,
         enumerate,
+        (map, find_potential_gear_positions),  # [[(0, 1), (0, 5)], [(1, 3)], []]
+        (filter, len),
         list,
-        (map, find_potential_gear_positions)
+        # (map, find_surrounding_numbers) # [[[228, 191, 9], [12, 4]], [[1]]]
     )
