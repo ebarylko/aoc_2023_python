@@ -211,3 +211,36 @@ def sum_part_numbers(schematic):
         (map, tz.first),
         sum,
     )
+
+
+def find_potential_gear_positions(t):
+    """
+    @param t: a tuple containing the row number and the line of the schematic corresponding to that row
+    @return: the positions of all the potential gears in the line
+    """
+    row_number, line = t
+    return tz.thread_last(
+        line,
+        (re.finditer, r"\*"),
+        (map, tz.compose(tz.first, op.methodcaller("span"))),
+        (zip, it.repeat(row_number)),
+        list
+    )
+
+
+
+def sum_gear_ratios(schematic):
+    """
+    @param schematic: a collection of lines containing symbols, periods, and digits
+    @return: the sum of all the gear ratios in the schematic
+    encontrar las posiciones de todas las estrellas en el schematic
+    encontrar la cantidad de numeros al rededor de las estrellas
+    filtrar las estrellas que solo tienen dos numeros
+    tomar el producto de los numeros en cada estrella
+    """
+    return tz.thread_last(
+        schematic,
+        enumerate,
+        list,
+        (map, find_potential_gear_positions)
+    )

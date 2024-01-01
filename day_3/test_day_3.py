@@ -77,6 +77,13 @@ def test_is_part_number():
 
 
 def test_sum_part_numbers():
-    # assert d3.sum_part_numbers(sample) == 4361
-    # assert d3.sum_part_numbers(sample_2) == 1
-    assert d3.sum_part_numbers(data) == 1
+    assert d3.sum_part_numbers(sample) == 4361
+    assert d3.sum_part_numbers(data) == 550934
+
+
+def test_find_potential_gear_positions():
+    assert d3.find_potential_gear_positions((1, "...*")) == [(1, 3)]
+
+
+def test_sum_gear_ratios():
+    assert d3.sum_gear_ratios(sample) == 467835
