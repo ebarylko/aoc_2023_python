@@ -1,18 +1,21 @@
 import day_3 as d3
 
-data = open("input.txt").readlines()
+data = open("input.txt").read().splitlines()
 sample = ["467..114..",
           "...*......",
           "..35..633.",
-          # "......#...",
-          # "617*......",
-          # ".....+.58.",
-          # "..592.....",
-          # "......755.",
-          # "...$.*....",
-          # ".664.598.."
+          "......#...",
+          "617*......",
+          ".....+.58.",
+          "..592.....",
+          "......755.",
+          "...$.*....",
+          ".664.598.."
           ]
 
+sample_2 = ["." * 6,
+            "...389",
+            "." * 6]
 
 def test_parse_line():
     assert d3.parse_line("46.1408.") == [(46, (0, 2)), (1408, (3, 7))]
@@ -74,4 +77,6 @@ def test_is_part_number():
 
 
 def test_sum_part_numbers():
-    assert d3.sum_part_numbers(sample) == 4361
+    # assert d3.sum_part_numbers(sample) == 4361
+    # assert d3.sum_part_numbers(sample_2) == 1
+    assert d3.sum_part_numbers(data) == 1

@@ -170,7 +170,7 @@ def find_numbers_and_positions(t):
     """
     index, line = t
     parsed = parse_line(line)
-    return not parsed or [(a, index, b) for a, b in parsed]
+    return [] if not parsed else [(a, index, b) for a, b in parsed]
 
 
 def is_part_number(schematic, number_info):
@@ -179,7 +179,8 @@ def is_part_number(schematic, number_info):
     @param number_info: a triplet containing a number, the row it is in, and the x coordinates it spans
     @return: true if there is a symbol adjacent to the number. False otherwise
     """
-    _, row, x_coordinates = number_info
+
+    num, row, x_coordinates = number_info
 
     possible_locations = [[row - 1, y] for y in range(*x_coordinates)] + \
                          [[row + 1, y] for y in range(*x_coordinates)] + \
@@ -190,6 +191,7 @@ def is_part_number(schematic, number_info):
         x, y = pos
         return x in range(0, len(schematic)) and y in range(0, len(schematic[0])) and schematic[x][y] not in ".0123456789"
 
+    locations = list(filter(contains_symbol, possible_locations))
     return tz.thread_last(
         possible_locations,
         (filter, contains_symbol),
@@ -205,16 +207,7 @@ def sum_part_numbers(schematic):
     return tz.thread_last(
         enumerate(schematic),
         (tz.mapcat, find_numbers_and_positions),  # (46, (1, 2))
-        list,
         (filter, tz.partial(is_part_number, schematic)),
-        # (map, tz.first),
-        # sum
+        (map, tz.first),
+        sum,
     )
-    # return tz.thread_last(
-    #     schematic,
-    #     get_all_schematic_triplets,
-    #     (it.chain, get_first_and_last_schematic_duplet(schematic)),
-    #     tz.first,
-    #     # tz.second,
-    #     # list
-    # )
