@@ -31,9 +31,10 @@ def find_numbers_and_positions(t):
 
 
 def generate_neighbours(t):
-    number, row, x_coordinates = t
+    _, row, x_coordinates = t
     column_span = range(*x_coordinates)
     surrounding_rows = [row - 1, row, row + 1]
+
     return set([(row - 1, y) for y in column_span] +
                [(row + 1, y) for y in column_span] +
                [(r, x_coordinates[0] - 1) for r in surrounding_rows] +
@@ -48,6 +49,7 @@ def is_part_number(schematic, number_info):
     ex: is_part_number(["....", "..1."], [(1, 1, (2, 3))]) -> false
     ex: is_part_number(["..*.", "..1."], [(1, 1, (2, 3))]) -> true
     """
+
     def contains_symbol(pos):
         x, y = pos
         return x in range(0, len(schematic)) and y in range(0, len(schematic[0])) and schematic[x][
@@ -61,11 +63,11 @@ def is_part_number(schematic, number_info):
     )
 
 
-
 def sum_part_numbers(schematic):
     """
     @param schematic: a collection of lines containing symbols, periods, and numbers
     @return: the sum of all the part numbers in the schematic
+    ex: sum_part_numbers(["1..*", "..34"]) -> 34
     """
     return tz.thread_last(
         schematic,

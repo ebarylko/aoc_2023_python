@@ -53,6 +53,10 @@ def test_find_surrounding_numbers():
     assert d3.find_surrounding_numbers(["..1..", "..*..", "..12."], [[(1, 2)]]) == [1, 12]
 
 
+def test_generate_neighbours():
+    assert d3.generate_neighbours((12, 1, (1, 3))) == 1
+
+
 def test_sum_gear_ratios():
     assert d3.sum_gear_ratios(sample) == 467835
     assert d3.sum_gear_ratios(data) == 81997870
