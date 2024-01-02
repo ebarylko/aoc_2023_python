@@ -87,6 +87,10 @@ def test_find_potential_gear_positions():
     assert d3.find_potential_gear_positions((1, "*.2*")) == [(1, 0), (1, 3)]
 
 
+def test_valid_gears_product():
+    sample = {0: [(1, 0, (1, 2)), (3, 0, (3, 4)), (6, 0, (4, 5))]}
+    assert d3.valid_gears_product(sample, (1, 2)) == 3
+
 def test_adjacent_numbers():
     assert d3.adjacent_numbers(["..1..", "..*..", "..12."], (1, 2)) == [1, 12]
 

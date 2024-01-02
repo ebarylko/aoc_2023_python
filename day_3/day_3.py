@@ -179,13 +179,7 @@ def is_part_number(schematic, number_info):
     @param number_info: a triplet containing a number, the row it is in, and the x coordinates it spans
     @return: true if there is a symbol adjacent to the number. False otherwise
     """
-
-    num, row, x_coordinates = number_info
-
-    possible_locations = [[row - 1, y] for y in range(*x_coordinates)] + \
-                         [[row + 1, y] for y in range(*x_coordinates)] + \
-                         [[r, x_coordinates[0] - 1] for r in [row - 1, row, row + 1]] + \
-                         [[r, x_coordinates[1]] for r in [row - 1, row, row + 1]]
+    possible_locations = generate_neighbours(number_info)
 
     def contains_symbol(pos):
         x, y = pos
@@ -198,6 +192,14 @@ def is_part_number(schematic, number_info):
         (filter, contains_symbol),
         tz.count
     )
+
+
+def generate_neighbours(t):
+    number, row, x_coordinates = t
+    return set([(row - 1, y) for y in range(*x_coordinates)] +
+               [(row + 1, y) for y in range(*x_coordinates)] +
+               [(r, x_coordinates[0] - 1) for r in [row - 1, row, row + 1]] +
+               [(r, x_coordinates[1]) for r in [row - 1, row, row + 1]])
 
 
 def sum_part_numbers(schematic):
@@ -235,14 +237,22 @@ def adjacent_numbers(schematic, possible_gear_location):
     @param possible_gear_location: the x, y coordinates of a potential gear
     @return: a collection of the numbers surrounding each gear
     """
+    x, y = possible_gear_location
+    possible_positions = it.product([x - 1, x, x + 1], [y - 1, y, y + 1])
     return tz.thread_last(
-        range(-1, 2),
-(lambda r: it.product(r, repeat=2)),
-        list,
-        (map, lambda c1, c2: (c1[0] + c2[0], c1[1] + c2[1]), it.repeat(possible_gear_location)),
+        possible_positions,
         list
-
     )
+
+
+#     return tz.thread_last(
+#         range(-1, 2),
+# (lambda r: it.product(r, repeat=2)),
+#         list,
+#         (map, lambda c1, c2: (c1[0] + c2[0], c1[1] + c2[1]), it.repeat(possible_gear_location)),
+#         list
+#
+#     )
 
 
 def find_surrounding_numbers(schematic, coll):
@@ -253,6 +263,26 @@ def find_surrounding_numbers(schematic, coll):
     return tz.thread_last(
         coll,
         (map, adjacent_numbers)
+    )
+
+
+def valid_gears_product(positions_of_numbers, gear_position):
+    """
+    @param positions_of_numbers: a dictionary with the row and all the numbers in that row
+    @param gear_position: the x, y coordinates of a gear
+    @return: 0 if the gear is not surrounded by two numbers. Otherwise, returns the product of the two numbers
+    """
+    x, y = gear_position
+    return tz.thread_last(
+        [x - 1, x, x + 1],
+        (tz.mapcat, lambda row: positions_of_numbers.get(row, [])),
+        (filter, lambda number_info: gear_position in generate_neighbours(number_info)),
+        (tz.map, tz.first),
+        (tz.reduce, op.mul),
+        # (tz.mapcat, tz.first),
+
+        # [positions_of_numbers.get(row) for row in [x - 1, x, x + 1] if positions_of_numbers.get(row)],
+        # (tz.mapcat, tz.identity)
     )
 
 
@@ -276,8 +306,9 @@ def sum_gear_ratios(schematic):
     return tz.thread_last(
         schematic,
         enumerate,
-        (map, find_potential_gear_positions),  # [[(0, 1), (0, 5)], [(1, 3)], []]
-        (filter, len),
-        list,
+        (tz.mapcat, find_potential_gear_positions),  # [[(0, 1), (0, 5)], [(1, 3)], []]
+        (tz.map, tz.partial(valid_gears_product, numbers_and_positions)),  # [1, 3, 17, 19]
+        # (filter, len),
+        # list,
         # (map, find_surrounding_numbers) # [[[228, 191, 9], [12, 4]], [[1]]]
     )
