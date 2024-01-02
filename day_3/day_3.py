@@ -30,33 +30,36 @@ def find_numbers_and_positions(t):
     return [] if not parsed else [(a, index, b) for a, b in parsed]
 
 
+def generate_neighbours(t):
+    number, row, x_coordinates = t
+    column_span = range(*x_coordinates)
+    surrounding_rows = [row - 1, row, row + 1]
+    return set([(row - 1, y) for y in column_span] +
+               [(row + 1, y) for y in column_span] +
+               [(r, x_coordinates[0] - 1) for r in surrounding_rows] +
+               [(r, x_coordinates[1]) for r in surrounding_rows])
+
+
 def is_part_number(schematic, number_info):
     """
     @param schematic: a collection of lines containing numbers, symbols, and periods
     @param number_info: a triplet containing a number, the row it is in, and the x coordinates it spans
     @return: true if there is a symbol adjacent to the number. False otherwise
+    ex: is_part_number(["....", "..1."], [(1, 1, (2, 3))]) -> false
+    ex: is_part_number(["..*.", "..1."], [(1, 1, (2, 3))]) -> true
     """
-    possible_locations = generate_neighbours(number_info)
-
     def contains_symbol(pos):
         x, y = pos
         return x in range(0, len(schematic)) and y in range(0, len(schematic[0])) and schematic[x][
             y] not in ".0123456789"
 
-    locations = list(filter(contains_symbol, possible_locations))
     return tz.thread_last(
-        possible_locations,
+        number_info,
+        generate_neighbours,
         (filter, contains_symbol),
         tz.count
     )
 
-
-def generate_neighbours(t):
-    number, row, x_coordinates = t
-    return set([(row - 1, y) for y in range(*x_coordinates)] +
-               [(row + 1, y) for y in range(*x_coordinates)] +
-               [(r, x_coordinates[0] - 1) for r in [row - 1, row, row + 1]] +
-               [(r, x_coordinates[1]) for r in [row - 1, row, row + 1]])
 
 
 def sum_part_numbers(schematic):
@@ -65,7 +68,8 @@ def sum_part_numbers(schematic):
     @return: the sum of all the part numbers in the schematic
     """
     return tz.thread_last(
-        enumerate(schematic),
+        schematic,
+        enumerate,
         (tz.mapcat, find_numbers_and_positions),  # (46, (1, 2))
         (filter, tz.partial(is_part_number, schematic)),
         (map, tz.first),
