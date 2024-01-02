@@ -278,11 +278,8 @@ def valid_gears_product(positions_of_numbers, gear_position):
         (tz.mapcat, lambda row: positions_of_numbers.get(row, [])),
         (filter, lambda number_info: gear_position in generate_neighbours(number_info)),
         (tz.map, tz.first),
-        (tz.reduce, op.mul),
-        # (tz.mapcat, tz.first),
-
-        # [positions_of_numbers.get(row) for row in [x - 1, x, x + 1] if positions_of_numbers.get(row)],
-        # (tz.mapcat, tz.identity)
+        list,
+        lambda numbers: tz.reduce(op.mul, numbers) if len(numbers) == 2 else 0
     )
 
 
@@ -290,10 +287,6 @@ def sum_gear_ratios(schematic):
     """
     @param schematic: a collection of lines containing symbols, periods, and digits
     @return: the sum of all the gear ratios in the schematic
-    encontrar las posiciones de todas las estrellas en el schematic
-    encontrar la cantidad de numeros al rededor de las estrellas
-    filtrar las estrellas que solo tienen dos numeros
-    tomar el producto de los numeros en cada estrella
     """
     numbers_and_positions = tz.thread_last(
         schematic,
@@ -306,9 +299,8 @@ def sum_gear_ratios(schematic):
     return tz.thread_last(
         schematic,
         enumerate,
-        (tz.mapcat, find_potential_gear_positions),  # [[(0, 1), (0, 5)], [(1, 3)], []]
+        (tz.mapcat, find_potential_gear_positions),  # [(0, 1), (0, 5), (1, 3)]
         (tz.map, tz.partial(valid_gears_product, numbers_and_positions)),  # [1, 3, 17, 19]
-        # (filter, len),
-        # list,
-        # (map, find_surrounding_numbers) # [[[228, 191, 9], [12, 4]], [[1]]]
+        list,
+        sum
     )
